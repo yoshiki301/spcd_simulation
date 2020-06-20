@@ -47,6 +47,7 @@ NormalGenerativeModel <- R6Class("NormalGenerativeModel",
     },
     generateSample = function(baseline, group, stage2_assign = NULL) {
       # generate samples following different normal distribution in 2 stages
+      # return vector of stage1 outcome y1 and stage2 outcome y2
       assert_that(
         is.numeric(baseline),
         length(baseline) == 1,
@@ -71,11 +72,11 @@ NormalGenerativeModel <- R6Class("NormalGenerativeModel",
         self$mu2 <- private$m.meanFunction(private$m.b2, y1)
         self$sigma2 <- 49
       } else if (group == "responder") {
-        assert_that(stage2_assign == 0 | stage2_assign == 1)
+        assert_that(stage2_assign == 0 || stage2_assign == 1)
         self$mu2 <- private$m.meanFunction(private$m.b4, y1, assign = stage2_assign)
         self$sigma2 <- 4
       } else {
-        assert_that(stage2_assign == 0 | stage2_assign == 1)
+        assert_that(stage2_assign == 0 || stage2_assign == 1)
         self$mu2 <- private$m.meanFunction(private$m.b6, y1, assign = stage2_assign)
         self$sigma2 <- 4
       }
@@ -95,6 +96,8 @@ NormalGenerativeModel <- R6Class("NormalGenerativeModel",
     m.b5 = NULL,
     m.b6 = NULL,
     m.meanFunction = function(b, y, assign = NULL) {
+      # calculate mean by regression model
+      # the length(b) is 3 if the stage2 assign exists, otherwise 2.
       if (length(b) == 2) {
         return (b[1] + b[2]*y)
       } else {
