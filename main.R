@@ -72,3 +72,5 @@ patient_data_baseline <- data.frame(
   group = group,
   stage2_assign = stage2_assign
 )
+
+write.csv(patient_data_baseline, "./normal_sample.csv")
