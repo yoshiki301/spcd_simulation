@@ -1,4 +1,13 @@
-source("./class/NormalGenerativeModel.R")
+library("config")
+
+config <<- config::get()
+datapath <<- config$datapath
+destdir <<- config$destdir
+model <<- config$model
+
+# read config file
+source(model)
+simulation_csv_path <- file.path(destdir, datapath)
 
 seed <- 101
 patient_size <- 10000
@@ -73,4 +82,4 @@ patient_data_baseline <- data.frame(
   stage2_assign = stage2_assign
 )
 
-write.csv(patient_data_baseline, "./normal_sample.csv")
+write.csv(patient_data_baseline, simulation_csv_path)

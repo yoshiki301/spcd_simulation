@@ -1,0 +1,4 @@
+default:
+  datapath: "normal_sample.csv"
+  destdir: "./normal"
+  model: "./class/NormalGenerativeModel.R"
