@@ -74,7 +74,7 @@ GenerativeModel <- NormalGenerativeModel$new(
 
 res <- mapply(GenerativeModel$generateSample, y01, group, stage2_assign)
 
-patient_data_baseline <- data.frame(
+patient_data <- data.frame(
   y01 = y01,
   y1 = res[1,],
   y2 = res[2,],
@@ -82,4 +82,4 @@ patient_data_baseline <- data.frame(
   stage2_assign = stage2_assign
 )
 
-write.csv(patient_data_baseline, simulation_csv_path)
+write.csv(patient_data, simulation_csv_path)
