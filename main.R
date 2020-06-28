@@ -10,76 +10,64 @@ source(model)
 simulation_csv_path <- file.path(destdir, datapath)
 
 seed <- 101
-patient_size <- 10000
-pi <- 0.3 # placebo response probability
-drug_assign <- 0.4
+set.seed(seed = seed)
+
+# fixed parameter
+pi <- 0.3
+delta1 <- 1.5
+delta2_nr <- 1.5
+h <- 0.5 # delta2_r = h * delta2_nr
+drug_assign <- 1/3
+
+# variable parameter
+rho_12 <- 0.2 # correlation between y1 and y2
+patient_size <- 600
 
 drug_size <- patient_size*drug_assign
 responder_size <- patient_size*(1 - drug_assign)*pi
 nonresponder_size <- patient_size*(1 - drug_assign)*(1 - pi)
 
-# baseline parameter
-mu0 <- 31
-sigma0 <- 25
-
-set.seed(seed = seed)
-
 # generate patients data
-y01 <- NULL
 group <- NULL
-stage2_assign <- NULL
 
 for (i in 1:drug_size) {
-  y01 <- append(y01, rnorm(1, mean = mu0, sd = sqrt(sigma0)))
-  group <- append(group, "drug")
-  stage2_assign <- append(stage2_assign, 0)
+  group <- append(group, "DD")
 }
 
 for (i in 1:responder_size) {
-  y01 <- append(y01, rnorm(1, mean = mu0, sd = sqrt(sigma0)))
-  group <- append(group, "responder")
   if (i <= responder_size*drug_assign) {
-    stage2_assign <- append(stage2_assign, 1)
+    group <- append(group, "rPD")
   } else {
-    stage2_assign <- append(stage2_assign, 0)
+    group <- append(group, "rPP")
   }
 }
 
 for (i in 1:nonresponder_size) {
-  y01 <- append(y01, rnorm(1, mean = mu0, sd = sqrt(sigma0)))
-  group <- append(group, "nonresponder")
-  if (i <= nonresponder_size*drug_assign) {
-    stage2_assign <- append(stage2_assign, 1)
+  if (i <= responder_size*drug_assign) {
+    group <- append(group, "nPD")
   } else {
-    stage2_assign <- append(stage2_assign, 0)
+    group <- append(group, "nPP")
   }
 }
 
-# model parameter
-b1 <- c(1.5, 1.2)
-b2 <- c(1.5, 1.2)
-b3 <- c(0.5, 1.0)
-b4 <- c(0.5, 1.0, 2.5)
-b5 <- c(0.5, 1.2)
-b6 <- c(0.5, 1.2, 2.5)
-
 GenerativeModel <- NormalGenerativeModel$new(
-  b1=b1,
-  b2=b2,
-  b3=b3,
-  b4=b4,
-  b5=b5,
-  b6=b6
+  pi=pi,
+  delta1=delta1,
+  delta2_nr=delta2_nr,
+  h=h,
+  rho_12=rho_12
 )
 
-res <- mapply(GenerativeModel$generateSample, y01, group, stage2_assign)
+res <- lapply(group, GenerativeModel$generateSample)
+y01 <- sapply(res, "[[", 1)
+y1 <- sapply(res, "[[", 2)
+y2 <- sapply(res, "[[", 3)
 
 patient_data <- data.frame(
   y01 = y01,
-  y1 = res[1,],
-  y2 = res[2,],
-  group = group,
-  stage2_assign = stage2_assign
+  y1 = y1,
+  y2 = y2,
+  group = group
 )
 
 write.csv(patient_data, simulation_csv_path)

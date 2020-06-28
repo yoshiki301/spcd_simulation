@@ -3,106 +3,84 @@ library("assertthat")
 
 NormalGenerativeModel <- R6Class("NormalGenerativeModel",
   public = list(
-    mu1 = NULL,
-    mu2 = NULL,
-    sigma1 = NULL,
-    sigma2 = NULL,
-    initialize = function(b1, b2, b3, b4, b5, b6) {
+    initialize = function(pi, delta1, delta2_nr, h, rho_12) {
       # check assertion and set private member
       assert_that(
-        is.numeric(b1),
-        is.numeric(b2),
-        is.numeric(b3),
-        is.numeric(b4),
-        is.numeric(b5),
-        is.numeric(b6),
-        length(b1) == 2,
-        length(b2) == 2,
-        length(b3) == 2,
-        length(b4) == 3,
-        length(b5) == 2,
-        length(b6) == 3
+        is.numeric(pi),
+        is.numeric(delta1),
+        is.numeric(delta2_nr),
+        is.numeric(h),
+        is.numeric(rho_12),
+        length(pi) == 1,
+        length(delta1) == 1,
+        length(delta2_nr) == 1,
+        length(h) == 1,
+        length(rho_12) == 1
       )
-      private$m.b1 <<- b1
-      names(private$m.b1) <<- c("b01", "b11")
-      private$m.b2 <<- b2
-      names(private$m.b2) <<- c("b02", "b12")
-      private$m.b3 <<- b3
-      names(private$m.b3) <<- c("b03", "b13")
-      private$m.b4 <<- b4
-      names(private$m.b4) <<- c("b04", "b14", "b24")
-      private$m.b5 <<- b5
-      names(private$m.b5) <<- c("b05", "b15")
-      private$m.b6 <<- b6
-      names(private$m.b6) <<- c("b06", "b16", "b26")
+      private$m.pi <- pi
+      private$m.delta1 <- delta1
+      private$m.delta2_nr <- delta2_nr
+      private$m.h <- h
+      private$m.rho_12 <- rho_12
+      
+      # execute cholesky factorization
+      corr <- rbind(c(1, 0.1, 0.1),
+                    c(0.1, 1, private$m.rho_12),
+                    c(0.1,private$m.rho_12,1))
+      private$m.L <- chol(corr)
     },
     printPrameters = function() {
       # print private members as parameters
-      print(private$m.b1)
-      print(private$m.b2)
-      print(private$m.b3)
-      print(private$m.b4)
-      print(private$m.b5)
-      print(private$m.b6)
+      print(private$m.pi)
+      print(private$m.delta1)
+      print(private$m.delta2_nr)
+      print(private$m.h)
+      print(private$m.rho_12)
+      print(private$m.L)
     },
-    generateSample = function(baseline, group, stage2_assign = NULL) {
+    generateSample = function(group) {
       # generate samples following different normal distribution in 2 stages
       # return vector of stage1 outcome y1 and stage2 outcome y2
       assert_that(
-        is.numeric(baseline),
-        length(baseline) == 1,
-        (group == "drug" || group == "responder" || group == "nonresponder")
+        (group == "DD" || group == "rPD" || group == "rPP" || group == "nPD" || group == "nPP")
       )
       
-      # stage 1
-      if (group == "drug") {
-        self$mu1 <- private$m.meanFunction(private$m.b1, baseline)
-        self$sigma1 <- 49
-      } else if (group == "responder") {
-        self$mu1 <- private$m.meanFunction(private$m.b3, baseline)
-        self$sigma1 <- 4
-      } else {
-        self$mu1 <- private$m.meanFunction(private$m.b5, baseline)
-        self$sigma1 <- 4
-      }
-      y1 <- rnorm(1, self$mu1, sqrt(self$sigma1))
+      # generate 3 standard normal random number
+      x <- rnorm(3, mean=0, sd=1)
       
-      # stage 2
-      if (group == "drug") {
-        self$mu2 <- private$m.meanFunction(private$m.b2, y1)
-        self$sigma2 <- 49
-      } else if (group == "responder") {
-        assert_that(stage2_assign == 0 || stage2_assign == 1)
-        self$mu2 <- private$m.meanFunction(private$m.b4, y1, assign = stage2_assign)
-        self$sigma2 <- 4
-      } else {
-        assert_that(stage2_assign == 0 || stage2_assign == 1)
-        self$mu2 <- private$m.meanFunction(private$m.b6, y1, assign = stage2_assign)
-        self$sigma2 <- 4
-      }
-      y2 <- rnorm(1, self$mu2, sqrt(self$sigma2))
+      # baseline
+      z1 <- private$m.L[1,1] * x[1]
+      y01 <- 5*z1 + 31
       
-      return (c(y1, y2))
+      # change in stage1
+      z2 <- private$m.L[2,1] * x[1] + private$m.L[2,2] * x[2]
+      switch (group,
+        "DD" = y1 <- 7*z2 + (16*private$m.pi + 9.7*(1-private$m.pi) + private$m.delta1),
+        "rPD" = y1 <- 2*z2 + 16,
+        "rPP" = y1 <- 2*z2 + 16,
+        "nPD" = y1 <- 2*z2 + 9.7,
+        "nPP" = y1 <- 2*z2 + 9.7,
+      )
+      
+      # change in stage2
+      z3 <- private$m.L[3,1] * x[1] + private$m.L[3,2] * x[2] + private$m.L[3,3] * x[3]
+      switch (group,
+              "DD" = y2 <- 7*z3 + 0.6*y1,
+              "rPD" = y2 <- 2*z3 + (0.6*y1 + private$m.delta2_nr*private$m.h),
+              "rPP" = y2 <- 2*z3 + 0.6*y1,
+              "nPD" = y2 <- 2*z3 + (0.6*y1 + private$m.delta2_nr),
+              "nPP" = y2 <- 2*z3 + 0.6*y1,
+      )
+      
+      return (c(y01, y1, y2))
     }
   ),
   private = list(
-    # Drug parameters
-    m.b1 = NULL,
-    m.b2 = NULL,
-    # Placebo responders parameters
-    m.b3 = NULL,
-    m.b4 = NULL,
-    # Placebo nonresponders parameters
-    m.b5 = NULL,
-    m.b6 = NULL,
-    m.meanFunction = function(b, y, assign = NULL) {
-      # calculate mean by regression model
-      # the length(b) is 3 if the stage2 assign exists, otherwise 2.
-      if (length(b) == 2) {
-        return (b[1] + b[2]*y)
-      } else {
-        return (b[1] + b[2]*y + b[3]*assign)
-      }
-    }
+    m.pi = NULL,
+    m.delta1 = NULL,
+    m.delta2_nr = NULL,
+    m.h = NULL,
+    m.rho_12 = NULL,
+    m.L = NULL
   )
 )
