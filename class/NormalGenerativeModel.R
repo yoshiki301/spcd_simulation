@@ -52,11 +52,13 @@ NormalGenerativeModel <- R6Class("NormalGenerativeModel",
       xl <- t(x) %*% private$m.L
       
       # baseline
-      z1 <- xl[1]
+      l1 <- private$m.L[,1]
+      z1 <- xl[1] / sqrt(t(l1) %*% l1)
       y01 <- 5*z1 + 31
       
       # change in stage1
-      z2 <- xl[2]
+      l2 <- private$m.L[,2]
+      z2 <- xl[2] / sqrt(t(l2) %*% l2)
       switch (group,
         "DD" = y1 <- 7*z2 + (16*private$m.pi + 9.7*(1-private$m.pi) + private$m.delta1),
         "rPD" = y1 <- 2*z2 + 16,
@@ -66,7 +68,8 @@ NormalGenerativeModel <- R6Class("NormalGenerativeModel",
       )
       
       # change in stage2
-      z3 <- xl[3]
+      l3 <- private$m.L[,3]
+      z3 <- xl[3] / sqrt(t(l3) %*% l3)
       # TODO : fix overestimation Corr(Y1, Y2)
       switch (group,
               "DD" = y2 <- 7*z3 + 0.6*(16*private$m.pi + 9.7*(1-private$m.pi) + private$m.delta1),
