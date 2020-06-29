@@ -64,12 +64,13 @@ NormalGenerativeModel <- R6Class("NormalGenerativeModel",
       
       # change in stage2
       z3 <- private$m.L[1,3] * x[1] + private$m.L[2,3] * x[2] + private$m.L[3,3] * x[3]
+      # TODO : fix overestimation Corr(Y1, Y2)
       switch (group,
-              "DD" = y2 <- 7*z3 + 0.6*y1,
-              "rPD" = y2 <- 2*z3 + (0.6*y1 + private$m.delta2_nr*private$m.h),
-              "rPP" = y2 <- 2*z3 + 0.6*y1,
-              "nPD" = y2 <- 2*z3 + (0.6*y1 + private$m.delta2_nr),
-              "nPP" = y2 <- 2*z3 + 0.6*y1,
+              "DD" = y2 <- 7*z3 + 0.6*(16*private$m.pi + 9.7*(1-private$m.pi) + private$m.delta1),
+              "rPD" = y2 <- 2*z3 + (0.6*16 + private$m.delta2_nr*private$m.h),
+              "rPP" = y2 <- 2*z3 + 0.6*16,
+              "nPD" = y2 <- 2*z3 + (0.6*9.7 + private$m.delta2_nr),
+              "nPP" = y2 <- 2*z3 + 0.6*9.7,
       )
       
       return (c(y01, y1, y2))
