@@ -13,5 +13,5 @@ R version 4.0.1
 # 結果
 
 * `n=600`のときのデータ生成の結果
-  ![spcd_sim_600](/Users/irieyoshiki/Desktop/卒研/code/spcd_simulation/img/spcd_sim_600.png)
+  ![spcd_sim_600](https://github.com/yoshiki301/spcd_simulation/blob/master/img/spcd_sim_600.png)
 
