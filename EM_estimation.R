@@ -9,32 +9,37 @@ patient_df <- read.csv(simulation_csv_path)
 
 source("class/EMAlgorithm.R")
 
+w <- 0.5
 EMModel <- EMAlgorithmModel$new(
   df = patient_df,
-  eps = 0.0001
+  eps = 0.001,
+  w = w
 )
 
 EMModel$emSimulation(patient_df)
 
-EMModel$printProcess()
+EMModel$calculateEffect(patient_df)
 
-EMModel$printQlist()
+# EMModel$printProcess()
+
+# EMModel$printPramas()
+
+# EMModel$printQlist()
 
 # em algorithm by mclust
 library("mclust")
 
-placebo_df <- patient_df[patient_df$group != "DD", ]
-
-responder <- c()
-for (i in 1:nrow(placebo_df)) {
-  g <- placebo_df$group[i]
-  if (g == "rPD" || g == "rPP") {
-    responder <- append(responder, "responder")
+labeling_responder = function(group) {
+  if (group == "rPD" || group == "rPP") {
+    return("responder")
   }
   else {
-    responder <- append(responder, "nonresponder")
+    return("nonresponder")
   }
 }
+
+placebo_df <- patient_df[patient_df$group != "DD", ]
+responder <- lapply(placebo_df$group, labeling_responder)
 
 data_columns <- c("y01", "y1", "y2")
 placebo_data <- placebo_df[, data_columns]
@@ -43,7 +48,7 @@ result <- Mclust(placebo_data, G=2, modelNames="EEE")
 classification <- result$classification
 
 estimated_pi <- table(classification)[1] / length(classification)
-print(estimated_pi)
+# print(estimated_pi)
 
 estimated_label <- c()
 for (i in 1:nrow(placebo_df)) {
@@ -80,4 +85,7 @@ sigma_delta2_nr <- var(placebo_df[estimated_label == "nPD", "y2"]) + var(placebo
 
 delta_w <- w*delta1 + (1-w)*delta2_nr
 t <- delta_w / sqrt((w^2)*sigma_delta1+((1-w)^2)*sigma_delta2_nr)
+
+print(estimated_pi)
+print(delta_w)
 

@@ -16,3 +16,9 @@ patient_data %>%
 
 # check correlation and visualize
 ggpairs(select(patient_data, -X), aes(color = group, alpha = 0.7))
+
+p1 <- qplot(y01, y1, colour = group, data = patient_data)
+p2 <- qplot(y01, y2, colour = group, data = patient_data)
+p3 <- qplot(y1, y2, colour = group, data = patient_data)
+
+gridExtra::grid.arrange(p1, p2, p3, nrow = 1)
