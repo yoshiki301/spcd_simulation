@@ -14,6 +14,8 @@ simulation_csv_path <- file.path(destdir, datapath)
 seed <- 101
 set.seed(seed = seed)
 
+sim_num <- 5000
+
 # fixed parameter
 pi <- 0.3
 delta1 <- 1.5
@@ -26,19 +28,19 @@ source("class/EMAlgorithm.R")
 rho <- c(-0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5)
 sample <- c(90, 120, 150, 225, 300, 450, 600)
 
-pi_df <- data.frame(matrix(0, nrow=7, ncol=7))
+pi_df <- data.frame(matrix(0, nrow=11, ncol=7))
 names(pi_df) <- sample
 rownames(pi_df) <- rho
 
-effect_df <- data.frame(matrix(0, nrow=7, ncol=7))
+effect_df <- data.frame(matrix(0, nrow=11, ncol=7))
 names(effect_df) <- sample
 rownames(effect_df) <- rho
 
-mse_df <- data.frame(matrix(0, nrow=7, ncol=7))
-names(mse_df) <- sample
-rownames(mse_df) <- rho
+#mse_df <- data.frame(matrix(0, nrow=7, ncol=11))
+#names(mse_df) <- sample
+#rownames(mse_df) <- rho
 
-for (i in 1:20){
+for (i in 1:sim_num){
   print(i)
 for (rho_12 in rho){
   for (patient_size in sample){
@@ -105,7 +107,7 @@ for (rho_12 in rho){
     
     estimated_pi <- table(classification)[1] / length(classification)
     
-    pi_df[as.character(rho_12),as.character(patient_size)] <- estimated_pi
+    pi_df[as.character(rho_12),as.character(patient_size)] <- pi_df[as.character(rho_12),as.character(patient_size)] + estimated_pi
     
     labeling_estimation = function(truth_g, estimated_g){
       if (estimated_g == 1) {
@@ -142,7 +144,7 @@ for (rho_12 in rho){
     hat_delta_w <- w*hat_delta1 + (1-w)*hat_delta2_nr
     #t <- delta_w / sqrt((w^2)*sigma_delta1+((1-w)^2)*sigma_delta2_nr)
 
-    effect_df[as.character(rho_12),as.character(patient_size)] <- hat_delta_w
+    effect_df[as.character(rho_12),as.character(patient_size)] <- effect_df[as.character(rho_12),as.character(patient_size)] + hat_delta_w
     
     # calculate MSE?
     #se <- cbind(placebo_df, classification) %>%
@@ -150,13 +152,15 @@ for (rho_12 in rho){
     #  summarise(s1=sum((y1-mean(y1))**2), s2=sum((y2-mean(y2))**2)) %>%
     #  select(s1, s2)
     #mse <- apply(se, 2, sum)
-    #mse <- mse / nrow(placebo_df)
+    #mse <- mse / nrow(placeb
   }
 }
+  print(pi_df)
+  print(effect_df)
 }
 
-pi_df <- pi_df / 20
-effect_df <- effect_df / 20
+pi_df <- pi_df / sim_num
+effect_df <- effect_df / sim_num
 
 write.csv(pi_df, "./normal/pi.csv")
 write.csv(effect_df, "./normal/effect.csv")
