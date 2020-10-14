@@ -25,3 +25,21 @@ labeling_estimation = function(truth_g, estimated_g){
     }
   }
 }
+
+encode_group = function(group) {
+  # encode group to 2 binary labels (0 or 1)
+  if (group == "DD") {
+    g1 <- 1
+    g2 <- 1
+  } else {
+    g1 <- 0
+    if (group == "rPD" || group == "nPD") {
+      g2 <- 1
+    } else {
+      g2 <- 0
+    }
+  }
+  
+  res <- c(g1, g2)
+  return(res)
+}
