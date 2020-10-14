@@ -201,11 +201,13 @@ doEMy = function(d,s){
   s2 <- emy$parameters
   r <- emy$response
 
-  while (max(abs(s1-s2))>0.0001) {
+  step <- 1
+  while (max(abs(s1-s2))>0.0001 && step < 10000) {
     s1 <- s2
     emy <- EMy(d,s1);
     s2 <- emy$parameters
     r <- emy$response
+    step <- step + 1
   }
   
   z<-list(d,s2,r);

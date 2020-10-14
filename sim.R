@@ -1,25 +1,15 @@
-library("config")
 library("dplyr")
-library("mclust")
+# library("mclust")
 
 source("helper.R")
 source("random_sampling.R")
 # source("class/EMAlgorithm.R")
 source("EMy2.0.R")
 
-config <<- config::get()
-datapath <<- config$datapath
-destdir <<- config$destdir
-model <<- config$model
-
-# read config file
-source(model)
-simulation_csv_path <- file.path(destdir, datapath)
-
 seed <- 101
 set.seed(seed = seed)
 
-sim_num <- 5000
+sim_num <- 100
 
 # fixed paramters
 spcd_w <- 0.6
@@ -66,6 +56,7 @@ for (i in 1:sim_num){
       
       np <- sum(ordered_data["g1"] == 0)
       
+      # EM estimation
       # the latter 27 parameters are dummies, so set to 0.5
       initial_parameters <- c(em_parameters, initial_pi, m01, m02, rep(0.5,27))
       result <- doEMy(
