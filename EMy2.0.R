@@ -196,7 +196,7 @@ return(z)
 
 doEMy = function(d,s){
   s1 <- s
-  emy <- EMy(d,s);
+  emy <- EMy(d,s1);
 
   s2 <- emy$parameters
   r <- emy$response
@@ -210,7 +210,7 @@ doEMy = function(d,s){
     step <- step + 1
   }
   
-  z<-list(d,s2,r);
-  names(z)<-c("data","parameters","response");
+  z <- list(d,s2,r);
+  names(z) <- c("data","parameters","response");
   return(z);
 }
