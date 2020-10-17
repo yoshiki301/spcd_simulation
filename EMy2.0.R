@@ -36,11 +36,11 @@ d$y1c<-d$y1-mean(d$y1)
 #Response Probability;
 # Stage I data only;
 
-A=dnorm(d$y1,s[7]+s[8]*d$y0c,sqrt(s[9]))
-B=dnorm(d$y1,s[14]+s[15]*d$y0c,sqrt(s[16]))
+A<-dnorm(d$y1,s[7]+s[8]*d$y0c,sqrt(s[9]))
+B<-dnorm(d$y1,s[14]+s[15]*d$y0c,sqrt(s[16]))
 
-pR=s[21]*A/(s[21]*A+(1-s[21])*B)
-s[21]<-mean(pR[1:np],na.rm=T)
+pR<-s[21]*A/(s[21]*A+(1-s[21])*B)
+s[21]<-mean(pR[d$g1==0],na.rm=T)
 pR[which(is.na(pR))]<-0
 
 ######################################## estimates #############################################
@@ -202,7 +202,7 @@ doEMy = function(d,s){
   r <- emy$response
 
   step <- 1
-  while (max(abs(s1-s2))>0.0001 && step < 10000) {
+  while (max(abs(s1-s2))>0.0001 & step < 10000) {
     s1 <- s2
     emy <- EMy(d,s1);
     s2 <- emy$parameters
