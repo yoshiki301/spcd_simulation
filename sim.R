@@ -7,7 +7,7 @@ source("EMy2.0.R")
 seed <- 101
 set.seed(seed = seed)
 
-sim_num <- 100
+sim_num <- 1100
 
 # fixed paramters
 spcd_w <- 0.5
@@ -15,8 +15,8 @@ spcd_w <- 0.5
 # prepare parameters of EM estimation
 em_parameters <- c(
   14, 0.2, 49,      # drug stage 1
-  8.0, 0.2, 49,      # drug stage 2
-  16, 0.1, 4,      # responder stage 1
+  8.0, 0.2, 49,     # drug stage 2
+  16, 0.1, 4,       # responder stage 1
   9.6, 0.1, 1.5, 4, # responder stage 2
   9.7, 0.1, 4,      # nonresponder stage 1
   5.8, 0.1, 1.5, 4  # nonresponder stage 2
@@ -52,6 +52,8 @@ for (i in 1:sim_num){
   delta1_matrix <- result_shape
   delta2_matrix <- result_shape
   
+  save_flag <- TRUE
+  
   for (rho_12 in rho){
     for (patient_size in sample){
       
@@ -74,39 +76,49 @@ for (i in 1:sim_num){
         s = initial_parameters
       )
       
-      stage1_drug <- patient_data[patient_data["g1"]==1, "y01"]
-      stage1_placebo <- patient_data[patient_data["g1"]==0, "y01"]
+      if (result == "solve error"){
+        save_flag <- FALSE
+      } else {
+        stage1_drug <- patient_data[patient_data["g1"]==1, "y01"]
+        stage1_placebo <- patient_data[patient_data["g1"]==0, "y01"]
       
-      estimated_values <- calculate_estimated_values(
-        parameters = result$parameters,
-        stage1_drug = stage1_drug,
-        stage1_placebo = stage1_placebo,
-        spcd_w = spcd_w
-      )
+        estimated_values <- calculate_estimated_values(
+          parameters = result$parameters,
+          stage1_drug = stage1_drug,
+          stage1_placebo = stage1_placebo,
+          spcd_w = spcd_w
+        )
 
-      s <- as.character(patient_size)
-      r <- as.character(rho_12)
-      pi_matrix[s, r] <- estimated_values$pi
-      effect_matrix[s, r] <- estimated_values$delta_w
-      mu10_matrix[s, r] <- estimated_values$mu10
-      mu11_matrix[s, r] <- estimated_values$mu11
-      delta1_matrix[s, r] <- estimated_values$delta1
-      delta2_matrix[s, r] <- estimated_values$delta2_nr
+        s <- as.character(patient_size)
+        r <- as.character(rho_12)
+        pi_matrix[s, r] <- estimated_values$pi
+        effect_matrix[s, r] <- estimated_values$delta_w
+        mu10_matrix[s, r] <- estimated_values$mu10
+        mu11_matrix[s, r] <- estimated_values$mu11
+        delta1_matrix[s, r] <- estimated_values$delta1
+        delta2_matrix[s, r] <- estimated_values$delta2_nr
+      }
+      
     }
   }
-  number <- as.character(i)
   
-  pi_filepath <- paste(basedir, "pi_", number, ".csv", sep = "")
-  effect_filepath <- paste(basedir, "effect_", number, ".csv", sep = "")
-  mu10_filepath <- paste(basedir, "mu10_", number, ".csv", sep = "")
-  mu11_filepath <- paste(basedir, "mu11_", number, ".csv", sep = "")
-  delta1_filepath <- paste(basedir, "delta1_", number, ".csv", sep = "")
-  delta2_filepath <- paste(basedir, "delta2_", number, ".csv", sep = "")
+  if (save_flag) {
+    number <- as.character(i)
   
-  write.csv(pi_matrix, pi_filepath)
-  write.csv(effect_matrix, effect_filepath)
-  write.csv(mu10_matrix, mu10_filepath)
-  write.csv(mu11_matrix, mu11_filepath)
-  write.csv(delta1_matrix, delta1_filepath)
-  write.csv(delta2_matrix, delta2_filepath)
+    pi_filepath <- paste(basedir, "pi_", number, ".csv", sep = "")
+    effect_filepath <- paste(basedir, "effect_", number, ".csv", sep = "")
+    mu10_filepath <- paste(basedir, "mu10_", number, ".csv", sep = "")
+    mu11_filepath <- paste(basedir, "mu11_", number, ".csv", sep = "")
+    delta1_filepath <- paste(basedir, "delta1_", number, ".csv", sep = "")
+    delta2_filepath <- paste(basedir, "delta2_", number, ".csv", sep = "")
+  
+    write.csv(pi_matrix, pi_filepath)
+    write.csv(effect_matrix, effect_filepath)
+    write.csv(mu10_matrix, mu10_filepath)
+    write.csv(mu11_matrix, mu11_filepath)
+    write.csv(delta1_matrix, delta1_filepath)
+    write.csv(delta2_matrix, delta2_filepath)
+  } else {
+    print("fail solving")
+  }
 }

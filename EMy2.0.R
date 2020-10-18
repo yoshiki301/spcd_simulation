@@ -87,30 +87,42 @@ s11<-sum(d$g1)/s[3]
 s21<-sum(d$g1*d$y0c)/s[3]
 s12<-sum(d$g1*d$y0c)/s[3]
 s22<-sum(d$g1*(d$y0c**2))/s[3]
-v<-solve(matrix(c(s11,s21,s12,s22),2,2))
-s[24]<-v[1,1]
-s[25]<-v[1,2]
-s[26]<-v[2,2]
+v<-try(solve(matrix(c(s11,s21,s12,s22),2,2)))
+if (class(v) == "try-error"){
+  return("solve error")
+} else {
+  s[24]<-v[1,1]
+  s[25]<-v[1,2]
+  s[26]<-v[2,2]
+}
 
 #Stage 2 Drug;
 s11<-sum(d$g1)/s[6]
 s21<-sum(d$g1*d$y1c)/s[6]
 s12<-sum(d$g1*d$y1c)/s[6]
 s22<-sum(d$g1*(d$y1c**2))/s[6]
-v<-solve(matrix(c(s11,s21,s12,s22),2,2))
-s[27]<-v[1,1]
-s[28]<-v[1,2]
-s[29]<-v[2,2]
+v<-try(solve(matrix(c(s11,s21,s12,s22),2,2)))
+if (class(v) == "try-error"){
+  return("solve error")
+} else {
+  s[27]<-v[1,1]
+  s[28]<-v[1,2]
+  s[29]<-v[2,2]
+}
 
 #Stage 1 Placebo Responders;
 s11<-sum((1-d$g1)*pR)/s[9]
 s21<-sum((1-d$g1)*pR*d$y0c)/s[9]
 s12<-sum((1-d$g1)*pR*d$y0c)/s[9]
 s22<-sum((1-d$g1)*pR*(d$y0c**2))/s[9]
-v<-solve(matrix(c(s11,s21,s12,s22),2,2))
-s[30]<-v[1,1]
-s[31]<-v[1,2]
-s[32]<-v[2,2]
+v<-try(solve(matrix(c(s11,s21,s12,s22),2,2)))
+if (class(v) == "try-error"){
+  return("solve error")
+} else {
+  s[30]<-v[1,1]
+  s[31]<-v[1,2]
+  s[32]<-v[2,2]
+}
 
 #Stage 2 Placebo Responders;
 s11<-sum((1-d$g1)*pR)/s[13]
@@ -122,20 +134,28 @@ s32<-sum((1-d$g1)*pR*d$y1c*d$g2)/s[13]
 s13<-sum((1-d$g1)*pR*d$g2)/s[13]
 s23<-sum((1-d$g1)*pR*d$y1c*d$g2)/s[13]
 s33<-sum((1-d$g1)*pR*(d$g2**2))/s[13]
-v<-solve(matrix(c(s11,s21,s31,s12,s22,s32,s13,s23,s33),3,3))
-s[33]<-v[1,1]
-s[34]<-v[2,2]
-s[35]<-v[3,3]
+v<-try(solve(matrix(c(s11,s21,s31,s12,s22,s32,s13,s23,s33),3,3)))
+if (class(v) == "try-error"){
+  return("solve error")
+} else {
+  s[33]<-v[1,1]
+  s[34]<-v[2,2]
+  s[35]<-v[3,3]
+}
 
 #Stage 1 Placebo Non-Responders;
 s11<-sum((1-d$g1)*(1-pR))/s[16]
 s21<-sum((1-d$g1)*(1-pR)*d$y0c)/s[16]
 s12<-sum((1-d$g1)*(1-pR)*d$y0c)/s[16]
 s22<-sum((1-d$g1)*(1-pR)*(d$y0c**2))/s[16]
-v<-solve(matrix(c(s11,s21,s12,s22),2,2))
-s[36]<-v[1,1]
-s[37]<-v[1,2]
-s[38]<-v[2,2]
+v<-try(solve(matrix(c(s11,s21,s12,s22),2,2)))
+if (class(v) == "try-error"){
+  return("solve error")
+} else {
+  s[36]<-v[1,1]
+  s[37]<-v[1,2]
+  s[38]<-v[2,2]
+}
 
 #Stage 2 Placebo Non-Responders;
 s11<-sum((1-d$g1)*(1-pR))/s[20]
@@ -147,10 +167,14 @@ s32<-sum((1-d$g1)*(1-pR)*d$y1c*d$g2)/s[20]
 s13<-sum((1-d$g1)*(1-pR)*d$g2)/s[20]
 s23<-sum((1-d$g1)*(1-pR)*d$y1c*d$g2)/s[20]
 s33<-sum((1-d$g1)*(1-pR)*(d$g2**2))/s[20]
-v<-solve(matrix(c(s11,s21,s31,s12,s22,s32,s13,s23,s33),3,3))
-s[39]<-v[1,1]
-s[40]<-v[2,2]
-s[41]<-v[3,3]
+v<-try(solve(matrix(c(s11,s21,s31,s12,s22,s32,s13,s23,s33),3,3)))
+if (class(v) == "try-error"){
+  return("solve error")
+} else {
+  s[39]<-v[1,1]
+  s[40]<-v[2,2]
+  s[41]<-v[3,3]
+}
 
 ###################################### treatment effects ########################################
 
@@ -197,6 +221,10 @@ return(z)
 doEMy = function(d,s){
   s1 <- s
   emy <- EMy(d,s1);
+  
+  if (emy == "solve error"){
+    return(emy)
+  }
 
   s2 <- emy$parameters
   r <- emy$response
@@ -205,6 +233,9 @@ doEMy = function(d,s){
   while (max(abs(s1-s2))>0.0001 & step < 10000) {
     s1 <- s2
     emy <- EMy(d,s1);
+    if (emy == "solve error"){
+      return(emy)
+    }
     s2 <- emy$parameters
     r <- emy$response
     step <- step + 1
