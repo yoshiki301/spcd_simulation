@@ -1,21 +1,15 @@
 library("config")
 
-config <<- config::get()
-datapath <<- config$datapath
-destdir <<- config$destdir
-model <<- config$model
-
 # read config file
+config_params <<- config::get(config = "generate")
+model <<- config_params$generative_model
+seed <<- config_params$set_seed
 source(model)
-simulation_csv_path <- file.path(destdir, datapath)
-
-seed <- 101
 set.seed(seed = seed)
 
-random_sampling = function(rho_12, patient_size) {
+random_sampling = function(rho_12, patient_size, pi) {
 
   # fixed parameter
-  pi <- 0.3
   delta1 <- 1.5
   delta2_nr <- 1.5
   h <- 1 # delta2_r = h * delta2_nr
@@ -56,9 +50,3 @@ random_sampling = function(rho_12, patient_size) {
   
   return(patient_data)
 }
-
-# patient_data <- random_sampling(
-#   rho_12=0.1,
-#   patient_size=90
-# )
-# write.csv(patient_data, simulation_csv_path)

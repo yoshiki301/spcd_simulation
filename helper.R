@@ -77,3 +77,27 @@ calculate_estimated_values = function(
   
   return(result_values)
 }
+
+source("line_notify.R")
+
+make_notification = function(
+  header,
+  sim_num,
+  pi,
+  spcd_w
+) {
+  datetime <- Sys.time()
+  datetime_text <- paste("datetime : ", datetime, sep = "")
+  sim_num_text <- paste("simulation steps : ", sim_num, sep = "")
+  pi_text <- paste("pi : ", pi, sep = "")
+  w_text <- paste("spcd_w : ", spcd_w, sep = "")
+  notification_text <- paste(
+    header,
+    datetime_text,
+    sim_num_text,
+    pi_text,
+    w_text,
+    sep = "\n"
+  )
+  r <- notify(notification_text)
+}
