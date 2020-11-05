@@ -1,3 +1,5 @@
+library(tidyverse)
+
 # This version of EM algorithm for SPCD includes dependence on baseline values for Stage I and on Y1 for Stage II;
 # EM function is a single iteration of EM algorithm;
 # doEM function iterates EM function till convergence;
@@ -198,7 +200,7 @@ s[44]<-2*pnorm(abs(del_s1/sqrt(var_s1)),lower.tail=F)
 #Stage 2;
 #beta s[12] or s[19];
 #var s[35] or s[41];
-del_s2<-ifelse(s[23]>s[22],s[19],s[12]) 
+del_s2<-ifelse(s[23]>s[22],s[19],s[12])
 var_s2<-ifelse(s[23]>s[22],s[41],s[35])
 
 s[45]<-del_s2
@@ -230,7 +232,9 @@ doEMy = function(d,s){
   r <- emy$response
 
   step <- 1
-  while (max(abs(s1-s2))>0.0001 & step < 10000) {
+  ds <- abs(s1-s2)
+  ds <- ds %>% replace_na(0)
+  while (max(ds)>0.0001 & step < 10000) {
     s1 <- s2
     emy <- EMy(d,s1);
     if (emy == "solve error"){
@@ -239,6 +243,9 @@ doEMy = function(d,s){
     s2 <- emy$parameters
     r <- emy$response
     step <- step + 1
+    
+    ds <- abs(s1-s2)
+    ds <- ds %>% replace_na(0)
   }
   
   z <- list(d,s2,r);

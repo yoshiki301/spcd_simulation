@@ -52,31 +52,27 @@ calculate_estimated_values = function(
 ) {
   # calculate pi and effect
   estimated_pi <- parameters[21]
+  effect <- parameters[48]
+  effect_var <- parameters[49]
   
-  hat_mu11 <- parameters[1] + parameters[2]*mean(stage1_drug)
-  hat_mu101 <- parameters[7] + parameters[8]*mean(stage1_placebo)
-  hat_mu102 <- parameters[14] + parameters[15]*mean(stage1_placebo)
-  hat_mu10 <- estimated_pi*hat_mu101 + (1-estimated_pi)*hat_mu102
-  hat_delta1 <- hat_mu11 - hat_mu10
-  hat_delta2_nr <- parameters[19]
-  hat_delta_w <- spcd_w*hat_delta1 + (1-spcd_w)*hat_delta2_nr
+  #hat_mu11 <- parameters[1] + parameters[2]*mean(stage1_drug)
+  #hat_mu101 <- parameters[7] + parameters[8]*mean(stage1_placebo)
+  #hat_mu102 <- parameters[14] + parameters[15]*mean(stage1_placebo)
+  #hat_mu10 <- estimated_pi*hat_mu101 + (1-estimated_pi)*hat_mu102
+  #hat_delta1 <- hat_mu11 - hat_mu10
+  #hat_delta2_nr <- parameters[19]
+  #hat_delta_w <- spcd_w*hat_delta1 + (1-spcd_w)*hat_delta2_nr
   
   result_values <- list(
     estimated_pi,
-    hat_delta_w,
-    hat_mu10,
-    hat_mu11,
-    hat_delta1,
-    hat_delta2_nr
+    effect,
+    effect_var
   )
   
   names(result_values) <- c(
     "pi",
-    "delta_w",
-    "mu10",
-    "mu11",
-    "delta1",
-    "delta2_nr"
+    "effect",
+    "effect_var"
   )
   
   return(result_values)

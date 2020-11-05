@@ -3,11 +3,12 @@ library("dplyr")
 source("helper.R")
 source("random_sampling.R")
 source("EMy2.0.R")
+source("line_notify.R")
 
 seed <- 101
 set.seed(seed = seed)
 
-sim_num <- 1100
+sim_num <- 1020
 
 # fixed paramters
 spcd_w <- 0.5
@@ -26,8 +27,9 @@ m01 <- 1.5
 m02 <- 1.5
 
 # variable parameter
-rho <- c(-0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5)
-sample <- c(90, 300, 600, 1200)
+rho <- c(-0.5, 0, 0.5)
+sample <- c(90, 300, 600)
+pi <- 0.3
 
 # define result matrix shape
 result_shape <- data.frame(
@@ -39,7 +41,12 @@ result_shape <- data.frame(
 )
 dimnames(result_shape) <- list(sample, rho)
 
-basedir <- "./sim1/"
+basedir <- "./sim7/"
+
+# start notification
+datetime <- Sys.time()
+notification_text <- paste(datetime, "start", pi, basedir)
+r <- notify(notification_text)
 
 for (i in 1:sim_num){
   
@@ -47,10 +54,7 @@ for (i in 1:sim_num){
   
   pi_matrix <- result_shape
   effect_matrix <- result_shape
-  mu10_matrix <- result_shape
-  mu11_matrix <- result_shape
-  delta1_matrix <- result_shape
-  delta2_matrix <- result_shape
+  effect_t_matrix <- result_shape
   
   save_flag <- TRUE
   
@@ -92,11 +96,8 @@ for (i in 1:sim_num){
         s <- as.character(patient_size)
         r <- as.character(rho_12)
         pi_matrix[s, r] <- estimated_values$pi
-        effect_matrix[s, r] <- estimated_values$delta_w
-        mu10_matrix[s, r] <- estimated_values$mu10
-        mu11_matrix[s, r] <- estimated_values$mu11
-        delta1_matrix[s, r] <- estimated_values$delta1
-        delta2_matrix[s, r] <- estimated_values$delta2_nr
+        effect_matrix[s, r] <- estimated_values$effect
+        effect_t_matrix[s, r] <- (estimated_values$effect / estimated_values$effect_var)
       }
       
     }
@@ -107,18 +108,17 @@ for (i in 1:sim_num){
   
     pi_filepath <- paste(basedir, "pi_", number, ".csv", sep = "")
     effect_filepath <- paste(basedir, "effect_", number, ".csv", sep = "")
-    mu10_filepath <- paste(basedir, "mu10_", number, ".csv", sep = "")
-    mu11_filepath <- paste(basedir, "mu11_", number, ".csv", sep = "")
-    delta1_filepath <- paste(basedir, "delta1_", number, ".csv", sep = "")
-    delta2_filepath <- paste(basedir, "delta2_", number, ".csv", sep = "")
+    t_filepath <- paste(basedir, "t_", number, ".csv", sep = "")
   
     write.csv(pi_matrix, pi_filepath)
     write.csv(effect_matrix, effect_filepath)
-    write.csv(mu10_matrix, mu10_filepath)
-    write.csv(mu11_matrix, mu11_filepath)
-    write.csv(delta1_matrix, delta1_filepath)
-    write.csv(delta2_matrix, delta2_filepath)
+    write.csv(effect_t_matrix, t_filepath)
   } else {
     print("fail solving")
   }
 }
+
+# notification
+datetime <- Sys.time()
+notification_text <- paste(datetime, "end", pi, basedir)
+r <- notify(notification_text)
