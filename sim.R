@@ -103,7 +103,6 @@ for (pi in pi_list) {
           r <- as.character(rho_12)
           pi_matrix[s, r] <- estimated_values$pi
           effect_matrix[s, r] <- estimated_values$effect
-          effect_t_matrix[s, r] <- (estimated_values$effect / estimated_values$effect_var)
         }
       
       }
@@ -115,11 +114,9 @@ for (pi in pi_list) {
   
       pi_filepath <- paste(basedir, "pi_", number, ".csv", sep = "")
       effect_filepath <- paste(basedir, "effect_", number, ".csv", sep = "")
-      t_filepath <- paste(basedir, "t_", number, ".csv", sep = "")
   
       write.csv(pi_matrix, pi_filepath)
       write.csv(effect_matrix, effect_filepath)
-      write.csv(effect_t_matrix, t_filepath)
       
       i <- i + 1
     } else {
@@ -130,6 +127,7 @@ for (pi in pi_list) {
   make_notification(
     header = "---simulation end---",
     sim_num = sim_num,
+    spcd_w = spcd_w,
     pi = pi
   )
 }
