@@ -57,6 +57,7 @@ for (pi in pi_list) {
   
     print(i)
   
+    data_matrix <- data.frame()
     pi_matrix <- result_shape
     effect_matrix <- result_shape
     effect_t_matrix <- result_shape
@@ -92,6 +93,16 @@ for (pi in pi_list) {
           stage1_drug <- patient_data[patient_data["g1"]==1, "y01"]
           stage1_placebo <- patient_data[patient_data["g1"]==0, "y01"]
       
+          # bind data with response
+          patient_data_with_response <- data.frame(
+            patient_data,
+            response = result$response,
+            rho_12 = rho_12,
+            patient_size = patient_size
+          )
+          data_matrix <- rbind(data_matrix, patient_data_with_response)
+          
+          # calculate overall pi and effect
           estimated_values <- calculate_estimated_values(
             parameters = result$parameters,
             stage1_drug = stage1_drug,
@@ -112,9 +123,11 @@ for (pi in pi_list) {
     if (save_flag) {
       number <- as.character(i)
   
+      data_filepath <- paste(basedir, "data_", number, ".csv", sep = "")
       pi_filepath <- paste(basedir, "pi_", number, ".csv", sep = "")
       effect_filepath <- paste(basedir, "effect_", number, ".csv", sep = "")
   
+      write.csv(data_matrix, data_filepath)
       write.csv(pi_matrix, pi_filepath)
       write.csv(effect_matrix, effect_filepath)
       
