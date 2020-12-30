@@ -52,6 +52,8 @@ calculate_estimated_values = function(
 ) {
   # calculate pi and effect
   estimated_pi <- parameters[21]
+  delta1 <- parameters[42]
+  delta2nr <- parameters[45]
   effect <- parameters[48]
   effect_var <- parameters[49]
   
@@ -65,12 +67,16 @@ calculate_estimated_values = function(
   
   result_values <- list(
     estimated_pi,
+    delta1,
+    delta2nr,
     effect,
     effect_var
   )
   
   names(result_values) <- c(
     "pi",
+    "delta1",
+    "delta2nr",
     "effect",
     "effect_var"
   )

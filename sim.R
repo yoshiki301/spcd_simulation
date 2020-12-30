@@ -1,3 +1,4 @@
+library("stringr")
 library("dplyr")
 library("config")
 
@@ -59,6 +60,8 @@ for (pi in pi_list) {
   
     data_matrix <- data.frame()
     pi_matrix <- result_shape
+    delta1_matrix <- result_shape
+    delta2_matrix <- result_shape
     effect_matrix <- result_shape
     effect_t_matrix <- result_shape
   
@@ -113,6 +116,8 @@ for (pi in pi_list) {
           s <- as.character(patient_size)
           r <- as.character(rho_12)
           pi_matrix[s, r] <- estimated_values$pi
+          delta1_matrix[s, r] <- estimated_values$delta1
+          delta2_matrix[s, r] <- estimated_values$delta2nr
           effect_matrix[s, r] <- estimated_values$effect
         }
       
@@ -121,14 +126,18 @@ for (pi in pi_list) {
 
   
     if (save_flag) {
-      number <- as.character(i)
+      number <- str_pad(i, 4, pad="0")
   
       data_filepath <- paste(basedir, "data_", number, ".csv", sep = "")
       pi_filepath <- paste(basedir, "pi_", number, ".csv", sep = "")
+      delta1_filepath <- paste(basedir, "delta1_", number, ".csv", sep = "")
+      delta2_filepath <- paste(basedir, "delta2_", number, ".csv", sep = "")
       effect_filepath <- paste(basedir, "effect_", number, ".csv", sep = "")
   
       write.csv(data_matrix, data_filepath)
       write.csv(pi_matrix, pi_filepath)
+      write.csv(delta1_matrix, delta1_filepath)
+      write.csv(delta2_matrix, delta2_filepath)
       write.csv(effect_matrix, effect_filepath)
       
       i <- i + 1
@@ -144,3 +153,4 @@ for (pi in pi_list) {
     pi = pi
   )
 }
+
